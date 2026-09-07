@@ -1,0 +1,6 @@
+{
+  "name": "Sabbath School Sinza SDA",
+  "description": "Mfumo kamili wa usimamizi wa Idara ya Shule ya Sabato kwa Kanisa la Waadventista Wasabato Sinza (Sinza SDA Church).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

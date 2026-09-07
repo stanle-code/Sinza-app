@@ -1,0 +1,136 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin"
+      );
+    }
+
+    function isTeacher() {
+      return isSignedIn() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "teacher"
+      );
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Admins Collection (to track admin privileges)
+    match /admins/{userId} {
+      allow read: if isSignedIn();
+      allow create: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Classes Collection (already exists)
+    match /classes/{classId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Weekly Reports Collection
+    match /weekly_reports/{reportId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.memberId == request.auth.uid;
+      allow update: if isSignedIn() && (
+        (request.resource.data.memberId == request.auth.uid && resource.data.status == "submitted") || 
+        isTeacher() || 
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Attendance Collection
+    match /attendance/{attendanceId} {
+      allow read: if isSignedIn();
+      allow create, update: if isTeacher() || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Announcements Collection
+    match /announcements/{announcementId} {
+      allow read: if isSignedIn();
+      allow create, update: if isTeacher() || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Events Collection
+    match /events/{eventId} {
+      allow read: if isSignedIn();
+      allow create, update: if isAdmin();
+      allow update: if isSignedIn(); // RSVP updates
+      allow delete: if isAdmin();
+    }
+
+    // User Preferences
+    match /user_preferences/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(userId) || isAdmin();
+    }
+
+    // Notifications
+    match /notifications/{id} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn(); 
+      allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // Badges
+    match /badges/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Achievements
+    match /achievements/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Birthdays
+    match /birthdays/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || isOwner(id);
+    }
+
+    // Settings
+    match /settings/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Audit logs & Activity logs
+    match /audit_logs/{id} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+    }
+
+    match /activity_logs/{id} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+    }
+  }
+}

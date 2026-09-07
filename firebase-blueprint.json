@@ -1,0 +1,87 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Wasifu wa mtumiaji (Admin, Mwalimu, au Mshiriki)",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "fullName": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "email": { "type": "string" },
+        "gender": { "type": "string", "enum": ["Kiume", "Kike"] },
+        "dateOfBirth": { "type": "string" },
+        "classId": { "type": "string" },
+        "className": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "teacher", "member"] },
+        "status": { "type": "string", "enum": ["active", "suspended"] },
+        "bio": { "type": "string" },
+        "occupation": { "type": "string" },
+        "ministry": { "type": "string" },
+        "skills": { "type": "array" },
+        "talents": { "type": "array" },
+        "favoriteVerse": { "type": "string" },
+        "profilePhotoUrl": { "type": "string" },
+        "coverPhotoUrl": { "type": "string" },
+        "xp": { "type": "number" },
+        "level": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "fullName", "phoneNumber", "role", "status"]
+    },
+    "SabbathClass": {
+      "title": "Sabbath School Class",
+      "description": "Darasa la Shule ya Sabato lililopo",
+      "type": "object",
+      "properties": {
+        "classId": { "type": "string" },
+        "name": { "type": "string" },
+        "teacherId": { "type": "string" },
+        "teacherName": { "type": "string" },
+        "membersCount": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "archived"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["classId", "name", "status"]
+    },
+    "WeeklyReport": {
+      "title": "Weekly Report",
+      "description": "Taarifa ya kila juma ya mshiriki ya Huduma na Usomaji",
+      "type": "object",
+      "properties": {
+        "reportId": { "type": "string" },
+        "memberId": { "type": "string" },
+        "memberName": { "type": "string" },
+        "classId": { "type": "string" },
+        "className": { "type": "string" },
+        "weekStartDate": { "type": "string" },
+        "weekEndDate": { "type": "string" },
+        "hudumaYangu": { "type": "object" },
+        "hudumaJamii": { "type": "object" },
+        "usomajiLesoni": { "type": "object" },
+        "status": { "type": "string", "enum": ["submitted", "approved", "rejected"] },
+        "approvedBy": { "type": "string" },
+        "approvedByName": { "type": "string" },
+        "rejectionReason": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["reportId", "memberId", "classId", "weekStartDate", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Wasifu wa washiriki wote"
+    },
+    "/classes/{classId}": {
+      "schema": "SabbathClass",
+      "description": "Madarasa ya Shule ya Sabato"
+    },
+    "/weekly_reports/{reportId}": {
+      "schema": "WeeklyReport",
+      "description": "Taarifa za kila juma za washiriki"
+    }
+  }
+}
